@@ -18,7 +18,7 @@ conn = pymysql.connect(
     cursorclass=pymysql.cursors.DictCursor
 )
 
-# --- Pydantic Modell für spätere Routen ---
+# --- Pydantic Modell ---
 class Quatrain(BaseModel):
     id: Optional[int]
     century: int
@@ -59,7 +59,7 @@ def get_quatrain(century: int, number: int):
 @app.get("/symbol/{symbol}", response_model=List[dict])
 def get_by_symbol(symbol: str):
     with conn.cursor() as cursor:
-        cursor.execute("SELECT * FROM quatrains WHERE symbols LIKE %s", (f'%{symbol}%',))
+        cursor.execute("SELECT * FROM quatrains WHERE symbols LIKE %s", (f'%{symbol}%'))
         result = cursor.fetchall()
     return result
 
@@ -68,7 +68,7 @@ def get_by_symbol(symbol: str):
 def insert_quatrain(q: Quatrain):
     with conn.cursor() as cursor:
         sql = """
-        INSERT INTO quatrains
+        REPLACE INTO quatrains
         (century, quatrain_number, text_original, text_modern, symbols, themes,
          astrological_refs, chronotopes, historical_refs, linguistic_features, semantic_tags)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -79,7 +79,7 @@ def insert_quatrain(q: Quatrain):
             "[]", "[]", "[]", "[]", "[]"
         ))
         conn.commit()
-    return {"message": "Quatrain erfolgreich gespeichert"}
+    return {"message": "Quatrain erfolgreich gespeichert (oder ersetzt)"}
 
 # --- GET + POST: JSON-Datei in MySQL importieren ---
 @app.api_route("/init-data", methods=["GET", "POST"])
@@ -97,7 +97,7 @@ def init_data_from_json():
         for entry in data:
             try:
                 cursor.execute("""
-                    INSERT INTO quatrains (century, quatrain_number, text_original, text_modern,
+                    REPLACE INTO quatrains (century, quatrain_number, text_original, text_modern,
                     symbols, themes, astrological_refs, chronotopes, historical_refs,
                     linguistic_features, semantic_tags)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -112,4 +112,4 @@ def init_data_from_json():
                 raise HTTPException(status_code=500, detail=f"Fehler beim Einfügen in die Datenbank: {e}")
         conn.commit()
 
-    return JSONResponse(content={"message": f"{len(data)} Quatrains erfolgreich in die MySQL-Datenbank geladen."})
+    return JSONResponse(content={"message": f"{len(data)} Quatrains erfolgreich in die MySQL-Datenbank geladen (mit REPLACE INTO)."})
