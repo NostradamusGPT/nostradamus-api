@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -9,7 +8,7 @@ import pymysql
 
 app = FastAPI(title="NostradamusGPT API", version="1.0.0")
 
-# --- DB-Verbindung ---
+# --- DB-Verbindung (Railway) ---
 conn = pymysql.connect(
     host="maglev.proxy.rlwy.net",
     port=30020,
@@ -19,7 +18,7 @@ conn = pymysql.connect(
     cursorclass=pymysql.cursors.DictCursor
 )
 
-# --- Pydantic Modell ---
+# --- Pydantic-Modell ---
 class Quatrain(BaseModel):
     id: Optional[int]
     century: int
@@ -36,7 +35,7 @@ class Quatrain(BaseModel):
 # --- JSON-Dateipfad ---
 JSON_PATH = "initial_quatrains.json"
 
-# --- Root-Check ---
+# --- Root Check ---
 @app.get("/")
 def read_root():
     return {"status": "Nostradamus API online"}
@@ -48,7 +47,7 @@ def get_all_quatrains():
         cursor.execute("SELECT * FROM quatrains ORDER BY century, quatrain_number")
         return cursor.fetchall()
 
-# --- Einzelnen Quatrain holen ---
+# --- Einzelnen Quatrain abrufen ---
 @app.get("/quatrain/{century}/{number}", response_model=dict)
 def get_quatrain(century: int, number: int):
     with conn.cursor() as cursor:
@@ -58,14 +57,14 @@ def get_quatrain(century: int, number: int):
         raise HTTPException(status_code=404, detail="Quatrain nicht gefunden")
     return result
 
-# --- Suche nach Symbol ---
+# --- Suche nach Symbolen ---
 @app.get("/symbol/{symbol}", response_model=List[dict])
 def get_by_symbol(symbol: str):
     with conn.cursor() as cursor:
-        cursor.execute("SELECT * FROM quatrains WHERE symbols LIKE %s", (f'%{symbol}%',))
+        cursor.execute("SELECT * FROM quatrains WHERE symbols LIKE %s", (f'%{symbol}%'))
         return cursor.fetchall()
 
-# --- Neuen Quatrain speichern ---
+# --- Einzelnen Quatrain speichern oder ersetzen ---
 @app.post("/quatrain", response_model=dict)
 def insert_quatrain(q: Quatrain):
     with conn.cursor() as cursor:
@@ -74,7 +73,7 @@ def insert_quatrain(q: Quatrain):
         (id, century, quatrain_number, text_original, text_modern,
          symbols, themes, astrological_refs, chronotopes, historical_refs,
          linguistic_features, semantic_tags, year_hint, notes, date,
-         interpretations, references)
+         interpretations, `references`)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(sql, (
@@ -85,9 +84,9 @@ def insert_quatrain(q: Quatrain):
             json.dumps(q.interpretations), json.dumps(q.references)
         ))
         conn.commit()
-    return {"message": "Quatrain erfolgreich gespeichert (REPLACE INTO)"}
+    return {"message": "Quatrain erfolgreich gespeichert (mit REPLACE INTO)"}
 
-# --- JSON-Daten vollständig importieren (GET & POST) ---
+# --- JSON-Daten vollständig importieren ---
 @app.api_route("/init-data", methods=["GET", "POST"])
 def init_data_from_json():
     if not os.path.exists(JSON_PATH):
@@ -106,7 +105,7 @@ def init_data_from_json():
                     REPLACE INTO quatrains (id, century, quatrain_number, text_original, text_modern,
                     symbols, themes, astrological_refs, chronotopes, historical_refs,
                     linguistic_features, semantic_tags, year_hint, notes, date,
-                    interpretations, references)
+                    interpretations, `references`)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, (
                     entry.get("id"), entry["century"], entry["quatrain"], entry["text"], entry["text"],
@@ -118,7 +117,7 @@ def init_data_from_json():
                     json.dumps(entry.get("references", []))
                 ))
             except Exception as e:
-                raise HTTPException(status_code=500, detail=f"Fehler bei Eintrag: {entry} – {e}")
+                raise HTTPException(status_code=500, detail=f"Fehler bei Eintrag: {entry} – {e}")
         conn.commit()
 
     return JSONResponse(content={"message": f"{len(data)} Quatrains erfolgreich in die MySQL-Datenbank geladen (mit REPLACE INTO)."})
@@ -130,7 +129,7 @@ def update_schema():
     ALTER TABLE quatrains
     ADD COLUMN IF NOT EXISTS date VARCHAR(20),
     ADD COLUMN IF NOT EXISTS interpretations JSON,
-    ADD COLUMN IF NOT EXISTS references JSON;
+    ADD COLUMN IF NOT EXISTS `references` JSON;
     """
     try:
         with conn.cursor() as cursor:
