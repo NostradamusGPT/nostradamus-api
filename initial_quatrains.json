@@ -3,30 +3,40 @@
     "id": 1,
     "century": 1,
     "quatrain": 1,
-    "text": "Sitting alone at night in secret study",
-    "symbols": ["night", "study"],
-    "clusters": ["initiation", "prophecy"],
-    "year_hint": "",
-    "notes": ""
+    "text": "Estant assis de nuict secret estude,\nSeul reposé sur la selle d’aerain:\nFlambe exigue sortant de solitude,\nFait prosperer qui n’est à croire vain.",
+    "symbols": [
+      "nuit",
+      "étude",
+      "flambeau",
+      "solitude",
+      "fer"
+    ],
+    "clusters": [
+      "prophetie",
+      "vision",
+      "initiation"
+    ],
+    "year_hint": "1555",
+    "notes": "Selbstbeschreibung Nostradamus’ in meditativer Schau"
   },
   {
     "id": 2,
     "century": 1,
     "quatrain": 2,
-    "text": "The rod in hand placed in the middle of branches",
-    "symbols": ["rod", "branches"],
-    "clusters": ["ritual", "power"],
+    "text": "La verge en main mise au milieu de Branches,\nDe l’onde il moulle & le limbe & le pied:\nUn peur & voix fremissent par les manches,\nDivin presage, effrayant le prophete.",
+    "symbols": [
+      "branche",
+      "eau",
+      "verge",
+      "tremblement",
+      "présage"
+    ],
+    "clusters": [
+      "nature",
+      "vision",
+      "divination"
+    ],
     "year_hint": "",
-    "notes": ""
-  },
-  {
-    "id": 3,
-    "century": 1,
-    "quatrain": 3,
-    "text": "He will be discovered beneath the false split",
-    "symbols": ["discovery", "deception"],
-    "clusters": ["deceit", "unmasking"],
-    "year_hint": "",
-    "notes": ""
+    "notes": "Symbolische Darstellung der Prophezeiung aus der Natur"
   }
 ]
