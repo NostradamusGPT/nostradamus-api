@@ -2,3 +2,4 @@ Flask==2.3.3
 PyMySQL==1.1.0
 gunicorn
 uvicorn
+flask-cors
