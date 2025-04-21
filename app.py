@@ -2,9 +2,10 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import pymysql
 import json
+import os
 
 app = Flask(__name__)
-CORS(app)  # Erlaube CORS für alle Domains
+CORS(app)
 
 # Verbindung zur Railway-MySQL-Datenbank
 conn = pymysql.connect(
@@ -57,6 +58,29 @@ def insert_quatrain():
         ))
         conn.commit()
     return jsonify({"message": "Quatrain gespeichert"})
+
+@app.route("/init-data", methods=["POST"])
+def init_data():
+    # Stelle sicher, dass die Datei im gleichen Verzeichnis liegt
+    json_path = os.path.join(os.path.dirname(__file__), "initial_quatrains.json")
+    with open(json_path, "r") as f:
+        data = json.load(f)
+
+    with conn.cursor() as cursor:
+        for entry in data:
+            cursor.execute("""
+                INSERT INTO quatrains (century, quatrain_number, text_original, text_modern,
+                symbols, themes, astrological_refs, chronotopes, historical_refs,
+                linguistic_features, semantic_tags)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                entry["century"], entry["quatrain_number"], entry["text_original"], entry["text_modern"],
+                json.dumps(entry["symbols"]), json.dumps(entry["themes"]), json.dumps(entry["astrological_refs"]),
+                json.dumps(entry["chronotopes"]), json.dumps(entry["historical_refs"]),
+                json.dumps(entry["linguistic_features"]), json.dumps(entry["semantic_tags"])
+            ))
+    conn.commit()
+    return jsonify({"message": "Alle Daten erfolgreich geladen"})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
