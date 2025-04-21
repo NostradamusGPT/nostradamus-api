@@ -1,97 +1,32 @@
 [
   {
+    "id": 1,
     "century": 1,
-    "quatrain_number": 1,
-    "text_original": "Estant assis de nuict secret estude",
-    "text_modern": "Sitting alone at night in secret study",
-    "symbols": [
-      "night",
-      "study"
-    ],
-    "themes": [
-      "solitude",
-      "revelation"
-    ],
-    "astrological_refs": [
-      "Saturn in Aquarius"
-    ],
-    "chronotopes": [
-      "nighttime",
-      "study room"
-    ],
-    "historical_refs": [
-      "Nostradamus' inspiration"
-    ],
-    "linguistic_features": [
-      "enjambment",
-      "archaic French"
-    ],
-    "semantic_tags": [
-      "initiation",
-      "prophecy"
-    ]
+    "quatrain": 1,
+    "text": "Sitting alone at night in secret study",
+    "symbols": ["night", "study"],
+    "clusters": ["initiation", "prophecy"],
+    "year_hint": "",
+    "notes": ""
   },
   {
+    "id": 2,
     "century": 1,
-    "quatrain_number": 2,
-    "text_original": "La verge en main mise au milieu de Branches",
-    "text_modern": "The rod in hand placed in the middle of branches",
-    "symbols": [
-      "rod",
-      "branches"
-    ],
-    "themes": [
-      "divination",
-      "nature"
-    ],
-    "astrological_refs": [
-      "Mars in Gemini"
-    ],
-    "chronotopes": [
-      "grove",
-      "ritual"
-    ],
-    "historical_refs": [
-      "druidic tradition"
-    ],
-    "linguistic_features": [
-      "symbolism",
-      "natural metaphor"
-    ],
-    "semantic_tags": [
-      "ritual",
-      "power"
-    ]
+    "quatrain": 2,
+    "text": "The rod in hand placed in the middle of branches",
+    "symbols": ["rod", "branches"],
+    "clusters": ["ritual", "power"],
+    "year_hint": "",
+    "notes": ""
   },
   {
+    "id": 3,
     "century": 1,
-    "quatrain_number": 3,
-    "text_original": "Il descouvert sera sous la faincte fente",
-    "text_modern": "He will be discovered beneath the false split",
-    "symbols": [
-      "discovery",
-      "deception"
-    ],
-    "themes": [
-      "betrayal",
-      "exposure"
-    ],
-    "astrological_refs": [
-      "Mercury retrograde"
-    ],
-    "chronotopes": [
-      "hidden chamber"
-    ],
-    "historical_refs": [
-      "political intrigue"
-    ],
-    "linguistic_features": [
-      "paradox",
-      "illusion"
-    ],
-    "semantic_tags": [
-      "deceit",
-      "unmasking"
-    ]
+    "quatrain": 3,
+    "text": "He will be discovered beneath the false split",
+    "symbols": ["discovery", "deception"],
+    "clusters": ["deceit", "unmasking"],
+    "year_hint": "",
+    "notes": ""
   }
 ]
