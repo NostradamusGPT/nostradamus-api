@@ -1,0 +1,33 @@
+[
+  {
+    "century": 1,
+    "quatrain_number": 1,
+    "text_original": "Estant assis de nuict secret estude...",
+    "text_modern": "W\u00e4hrend er nachts beim geheimen Studium sitzt...",
+    "symbols": [
+      "Nacht",
+      "Studium",
+      "Flamme"
+    ],
+    "themes": [
+      "okkultes Wissen",
+      "alchemistische Praxis"
+    ],
+    "astrological_refs": [],
+    "chronotopes": [
+      "Nacht",
+      "Meditation"
+    ],
+    "historical_refs": [
+      "alchemistische Praxis"
+    ],
+    "linguistic_features": [
+      "Chiffrierung",
+      "Metapher"
+    ],
+    "semantic_tags": [
+      "Einweihung",
+      "Transformation"
+    ]
+  }
+]
