@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -28,6 +29,9 @@ class Quatrain(BaseModel):
     clusters: List[str] = []
     year_hint: Optional[str] = ""
     notes: Optional[str] = ""
+    date: Optional[str] = ""
+    interpretations: Optional[List[dict]] = []
+    references: Optional[List[str]] = []
 
 # --- JSON-Dateipfad ---
 JSON_PATH = "initial_quatrains.json"
@@ -42,8 +46,7 @@ def read_root():
 def get_all_quatrains():
     with conn.cursor() as cursor:
         cursor.execute("SELECT * FROM quatrains ORDER BY century, quatrain_number")
-        result = cursor.fetchall()
-    return result
+        return cursor.fetchall()
 
 # --- Einzelnen Quatrain holen ---
 @app.get("/quatrain/{century}/{number}", response_model=dict)
@@ -59,9 +62,8 @@ def get_quatrain(century: int, number: int):
 @app.get("/symbol/{symbol}", response_model=List[dict])
 def get_by_symbol(symbol: str):
     with conn.cursor() as cursor:
-        cursor.execute("SELECT * FROM quatrains WHERE symbols LIKE %s", (f'%{symbol}%'))
-        result = cursor.fetchall()
-    return result
+        cursor.execute("SELECT * FROM quatrains WHERE symbols LIKE %s", (f'%{symbol}%',))
+        return cursor.fetchall()
 
 # --- Neuen Quatrain speichern ---
 @app.post("/quatrain", response_model=dict)
@@ -69,19 +71,23 @@ def insert_quatrain(q: Quatrain):
     with conn.cursor() as cursor:
         sql = """
         REPLACE INTO quatrains
-        (century, quatrain_number, text_original, text_modern, symbols, themes,
-         astrological_refs, chronotopes, historical_refs, linguistic_features, semantic_tags)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        (id, century, quatrain_number, text_original, text_modern,
+         symbols, themes, astrological_refs, chronotopes, historical_refs,
+         linguistic_features, semantic_tags, year_hint, notes, date,
+         interpretations, references)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(sql, (
-            q.century, q.quatrain, q.text, q.text,
+            q.id, q.century, q.quatrain, q.text, q.text,
             json.dumps(q.symbols), json.dumps(q.clusters),
-            "[]", "[]", "[]", "[]", "[]"
+            "[]", "[]", "[]", "[]", "[]",
+            q.year_hint, q.notes, q.date,
+            json.dumps(q.interpretations), json.dumps(q.references)
         ))
         conn.commit()
-    return {"message": "Quatrain erfolgreich gespeichert (oder ersetzt)"}
+    return {"message": "Quatrain erfolgreich gespeichert (REPLACE INTO)"}
 
-# --- GET + POST: JSON-Datei in MySQL importieren ---
+# --- JSON-Daten vollständig importieren (GET & POST) ---
 @app.api_route("/init-data", methods=["GET", "POST"])
 def init_data_from_json():
     if not os.path.exists(JSON_PATH):
@@ -97,19 +103,39 @@ def init_data_from_json():
         for entry in data:
             try:
                 cursor.execute("""
-                    REPLACE INTO quatrains (century, quatrain_number, text_original, text_modern,
+                    REPLACE INTO quatrains (id, century, quatrain_number, text_original, text_modern,
                     symbols, themes, astrological_refs, chronotopes, historical_refs,
-                    linguistic_features, semantic_tags)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    linguistic_features, semantic_tags, year_hint, notes, date,
+                    interpretations, references)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, (
-                    entry["century"], entry["quatrain"], entry["text"], entry["text"],
+                    entry.get("id"), entry["century"], entry["quatrain"], entry["text"], entry["text"],
                     json.dumps(entry.get("symbols", [])),
                     json.dumps(entry.get("clusters", [])),
-                    "[]", "[]", "[]", "[]", "[]"
+                    "[]", "[]", "[]", "[]", "[]",
+                    entry.get("year_hint", ""), entry.get("notes", ""), entry.get("date", ""),
+                    json.dumps(entry.get("interpretations", [])),
+                    json.dumps(entry.get("references", []))
                 ))
             except Exception as e:
-                print("Fehler bei Eintrag:", entry)
-                raise HTTPException(status_code=500, detail=f"Fehler beim Einfügen in die Datenbank: {e}")
+                raise HTTPException(status_code=500, detail=f"Fehler bei Eintrag: {entry} – {e}")
         conn.commit()
 
     return JSONResponse(content={"message": f"{len(data)} Quatrains erfolgreich in die MySQL-Datenbank geladen (mit REPLACE INTO)."})
+
+# --- Datenbankschema erweitern ---
+@app.get("/update-database-schema")
+def update_schema():
+    sql = """
+    ALTER TABLE quatrains
+    ADD COLUMN IF NOT EXISTS date VARCHAR(20),
+    ADD COLUMN IF NOT EXISTS interpretations JSON,
+    ADD COLUMN IF NOT EXISTS references JSON;
+    """
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(sql)
+        conn.commit()
+        return {"message": "Schema erfolgreich aktualisiert."}
+    except Exception as e:
+        return {"error": f"Schema konnte nicht aktualisiert werden: {e}"}
