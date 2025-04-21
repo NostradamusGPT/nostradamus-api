@@ -4,7 +4,7 @@ import pymysql
 import json
 
 app = Flask(__name__)
-CORS(app)  # Erlaube CORS für alle Domains (alternativ: origins=["https://whiskyforum.ch"])
+CORS(app)  # Erlaube CORS für alle Domains
 
 # Verbindung zur Railway-MySQL-Datenbank
 conn = pymysql.connect(
@@ -29,6 +29,13 @@ def get_quatrain(century, number):
 def get_by_symbol(symbol):
     with conn.cursor() as cursor:
         cursor.execute("SELECT * FROM quatrains WHERE symbols LIKE %s", [f'%{symbol}%'])
+        result = cursor.fetchall()
+    return jsonify(result)
+
+@app.route("/quatrains", methods=["GET"])
+def get_all_quatrains():
+    with conn.cursor() as cursor:
+        cursor.execute("SELECT * FROM quatrains ORDER BY century, quatrain_number")
         result = cursor.fetchall()
     return jsonify(result)
 
